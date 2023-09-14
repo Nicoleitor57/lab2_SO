@@ -18,7 +18,7 @@ struct jugador
 struct tablero
 {
     int id;
-    int data[ROWS][COLS][SIZE];
+    char data[ROWS][COLS][SIZE];
 };
 
 
