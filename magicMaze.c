@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "magicHeader.h"
+#include "magicFunctions.c"
 #include <string.h>
 
 int main() {
@@ -34,6 +35,8 @@ int main() {
         }
         printf("\n");
     }
+    printf("--------------------------\n");
+
 
     struct jugador jugador1;
 
@@ -41,17 +44,14 @@ int main() {
     jugador1.col = 1;
     strcpy(jugador1.number, "J1");
 
-    moveRight(jugador1, inicio);
+    moveRight(&jugador1, &inicio);
 
-    printTablero(inicio);
+
+    printTablero(&inicio);
 
     //cambiar a que la structura tablero almacene el struct jugador en la posicion 
 
 
 
-
-
-    
-    
     return 0;
 }
