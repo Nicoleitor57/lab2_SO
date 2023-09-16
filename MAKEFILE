@@ -1,0 +1,22 @@
+CC = gcc
+CFLAGS = -Wall
+
+# List of source files
+SRC = magicMaze.c magicFunctions.c
+
+# Object files generated from source files
+OBJ = $(SRC:.c=.o)
+
+# Executable name
+EXE = magicGame
+
+all: $(EXE)
+
+$(EXE): $(OBJ)
+	$(CC) $(CFLAGS) -o $@ $^
+
+%.o: %.c
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+clean:
+	rm -f $(OBJ) $(EXE)
