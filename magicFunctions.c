@@ -5,10 +5,35 @@
 void moveRight(struct jugador *jugador, struct tablero *tablero){
     int row = jugador->row;
     int col = jugador->col;
-    tablero->data[row][col][3] = 0;
-    tablero->data[row][col + 1][3] = jugador->number;
+    strcpy(tablero->data[row][col], "0");
+    strcpy(tablero->data[row][(col + 1)], jugador->number);
     jugador->col++;
-}
+};
+
+void moveDown(struct jugador *jugador, struct tablero *tablero){
+    int row = jugador->row;
+    int col = jugador->col;
+    strcpy(tablero->data[row][col], "0");
+    strcpy(tablero->data[row - 1][(col)], jugador->number);
+    jugador->row++;
+};
+
+void moveLeft(struct jugador *jugador, struct tablero *tablero){
+    int row = jugador->row;
+    int col = jugador->col;
+    strcpy(tablero->data[row][col], "0");
+    strcpy(tablero->data[row][(col - 1)], jugador->number);
+    jugador->col--;
+};
+
+void moveUp(struct jugador *jugador, struct tablero *tablero){
+    int row = jugador->row;
+    int col = jugador->col;
+    strcpy(tablero->data[row][col], "0");
+    strcpy(tablero->data[row + 1][(col)], jugador->number);
+    jugador->row++;
+};
+
 
 void printTablero(struct tablero *tablero){
     for (int i = 0; i < 5; i++) {
@@ -17,4 +42,4 @@ void printTablero(struct tablero *tablero){
         }
         printf("\n");
     }
-}
+};
