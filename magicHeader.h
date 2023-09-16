@@ -22,12 +22,12 @@ struct tablero
 };
 
 
-void moveRight(struct jugador, struct tablero);
-void moveLeft(struct jugador, struct tablero);
-void moveUp(struct jugador, struct tablero);
-void moveDown(struct jugador, struct tablero);
+void moveRight(struct jugador *jugador, struct tablero *tablero);
+void moveLeft(struct jugador *jugador, struct tablero *tablero);
+void moveUp(struct jugador *jugador, struct tablero *tablero);
+void moveDown(struct jugador *jugador, struct tablero *tablero);
 
-void printTablero(struct tablero);
+void printTablero(struct tablero *tablero);
 
 
 #endif
