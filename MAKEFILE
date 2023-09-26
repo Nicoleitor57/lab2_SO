@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall
+CFLAGS = -Wall -lm
 
 # List of source files
 SRC = magicMaze.c magicFunctions.c
