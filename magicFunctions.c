@@ -101,40 +101,67 @@ void Bsearch(struct jugador *jugador, struct tablero *tablero, char *(*mapData)[
     int row = jugador->row;
     int col = jugador->col;
     const char *newMap;
-    
+    FILE *file;
     
     if(row == 0){
 
         newMap = selectRandomItemFromRow(mapData,0);
         printf("%s\n",newMap);
-        return newMap;
-        //populateTablero(tablero, newMap, turno);
-        //printTablero(tablero);
+        file = fopen(newMap, "r");
+        if (file == NULL) {
+            perror("Error opening the file");
+            return 1;
+        }
+
+        populateTablero(tablero, file, turno);
+        printTablero(tablero);
+        fclose(file);
         
     }
     else if(row == 4){
         newMap = selectRandomItemFromRow(mapData,1);
         printf("%s\n",newMap);
-        //populateTablero(tablero, newMap, turno);
-        //printTablero(tablero);
+        file = fopen(newMap, "r");
+        if (file == NULL) {
+            perror("Error opening the file");
+            return 1;
+        }
+
+        populateTablero(tablero, file, turno);
+        printTablero(tablero);
+        fclose(file);
 
     }
     else if(col == 0){
         newMap = selectRandomItemFromRow(mapData,2);
         printf("%s\n",newMap);
-        //populateTablero(tablero, newMap, turno);
-        //printTablero(tablero);
+        file = fopen(newMap, "r");
+        if (file == NULL) {
+            perror("Error opening the file");
+            return 1;
+        }
+
+        populateTablero(tablero, file, turno);
+        printTablero(tablero);
+        fclose(file);
 
     }
     else if(col == 4){
         newMap = selectRandomItemFromRow(mapData,3);
         printf("%s\n",newMap);
-        //populateTablero(tablero, newMap, turno);
-        //printTablero(tablero);
+        file = fopen(newMap, "r");
+        if (file == NULL) {
+            perror("Error opening the file");
+            return 1;
+        }
+
+        populateTablero(tablero, file, turno);
+        printTablero(tablero);
+        fclose(file);
 
     }    
 
-}
+};
 
 void populateTablero(struct tablero *tablero, const char *filename, int turno){
     char cell[3];
