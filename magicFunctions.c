@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
+#include <stdlib.h>
 
 #define NUM_ROWS 4
 #define NUM_COLS 5
@@ -97,7 +98,7 @@ const char *selectRandomItemFromRow(char fileNames[][NUM_COLS][MAX_FILENAME_LENG
 //se define 1 como down
 //se define 2 como left
 //se define 3 como right
-void Bsearch(struct jugador *jugador, struct tablero *tablero, char *(*mapData)[5], int turno){
+void Bsearch(struct jugador *jugador, struct tablero *tablero, char *mapData[NUM_ROWS][NUM_COLS][MAX_FILENAME_LENGTH], int turno){
     int row = jugador->row;
     int col = jugador->col;
     const char *newMap;
@@ -110,7 +111,7 @@ void Bsearch(struct jugador *jugador, struct tablero *tablero, char *(*mapData)[
         file = fopen(newMap, "r");
         if (file == NULL) {
             perror("Error opening the file");
-            return 1;
+            
         }
 
         populateTablero(tablero, file, turno);
@@ -124,7 +125,7 @@ void Bsearch(struct jugador *jugador, struct tablero *tablero, char *(*mapData)[
         file = fopen(newMap, "r");
         if (file == NULL) {
             perror("Error opening the file");
-            return 1;
+            
         }
 
         populateTablero(tablero, file, turno);
@@ -138,7 +139,7 @@ void Bsearch(struct jugador *jugador, struct tablero *tablero, char *(*mapData)[
         file = fopen(newMap, "r");
         if (file == NULL) {
             perror("Error opening the file");
-            return 1;
+            
         }
 
         populateTablero(tablero, file, turno);
@@ -152,7 +153,7 @@ void Bsearch(struct jugador *jugador, struct tablero *tablero, char *(*mapData)[
         file = fopen(newMap, "r");
         if (file == NULL) {
             perror("Error opening the file");
-            return 1;
+            
         }
 
         populateTablero(tablero, file, turno);
@@ -163,7 +164,7 @@ void Bsearch(struct jugador *jugador, struct tablero *tablero, char *(*mapData)[
 
 };
 
-void populateTablero(struct tablero *tablero, const char *filename, int turno){
+void populateTablero(struct tablero *tablero, FILE *filename, int turno){
     char cell[3];
     tablero->id = turno;
     for (int i = 0; i < 5; i++) {
