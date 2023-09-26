@@ -1,7 +1,10 @@
 #include <stdio.h>
 #include "magicHeader.h"
-#include "magicFunctions.c"
+//#include "magicFunctions.c"
 #include <string.h>
+#include <stdlib.h> 
+#include <time.h>
+
 
 #define NUM_ROWS 4
 #define NUM_COLS 5
@@ -12,7 +15,7 @@ int main() {
     srand(time(NULL));
     struct tablero inicio;
     struct tablero mapa1;
-    //struct tablero mapa2;
+    struct tablero mapa2;
     //struct tablero mapa3;
     //struct tablero mapa4;
     //struct tablero mapa5;
@@ -58,17 +61,23 @@ int main() {
             return 1;
         }
 
+
         populateTablero(&inicio, file, turno);
         printTablero(&inicio);
         printf("--------------------------------------------\n");
-        
-        
-        
 
-
+        
         Bsearch(&jugador1, &mapa1, &mapData, turno);
-
+        Bsearch(&jugador1, &mapa2, &mapData, turno);
+        Bsearch(&jugador1, &mapa1, &mapData, turno);
+        Bsearch(&jugador1, &mapa2, &mapData, turno);
+        Bsearch(&jugador1, &mapa2, &mapData, turno);
         
+        
+
+        printf("--------\n");
+
+
           
         // Close the file
         fclose(file);
