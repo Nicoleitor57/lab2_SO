@@ -1,5 +1,6 @@
 #ifndef magicHeader_H
 #define magicHeader_H
+#include <stdio.h>
 
 #define ROWS 5
 #define COLS 5
@@ -35,10 +36,10 @@ void moveDown(struct jugador *jugador, struct tablero *tablero);
 void removeFromAllArrays(char arr[][NUM_COLS][MAX_FILENAME_LENGTH], int numRows, int numCols, const char *itemToRemove, int removed[][NUM_COLS]);
 const char *selectRandomItem(char arr[][NUM_COLS][MAX_FILENAME_LENGTH], int numRows, int numCols, int removed[][NUM_COLS], int rowIndex);
 const char *selectRandomItemFromRow(char fileNames[][NUM_COLS][MAX_FILENAME_LENGTH], int rowIndex);
-void Bsearch(struct jugador *jugador, struct tablero *tablero,char *(*mapData)[5], int turno);
+void Bsearch(struct jugador *jugador, struct tablero *tablero,char *mapData[NUM_ROWS][NUM_COLS][MAX_FILENAME_LENGTH], int turno);
 
 
-void populateTablero(struct tablero *tablero, const char *filename, int turno);
+void populateTablero(struct tablero *tablero, FILE *filename, int turno);
 void printTablero(struct tablero *tablero);
 
 
