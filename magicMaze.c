@@ -4,6 +4,9 @@
 #include <string.h>
 #include <stdlib.h> 
 #include <time.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 
 #define NUM_ROWS 4
@@ -53,36 +56,69 @@ int main() {
         {"tablero4.txt","tablero1.txt","tablero3.txt","tablero6.txt","tablero7.txt"},
     };
 
-    for(int turno = 1; turno <= 1; turno++){
-        file = fopen("Inicio.txt", "r");
-         // Check if the file was successfully opened
-        if (file == NULL) {
-            perror("Error opening the file");
+    file = fopen("Inicio.txt", "r");
+        // Check if the file was successfully opened
+    if (file == NULL) {
+        perror("Error opening the file");
+        return 1;
+    }
+    
+    int turnos = 15;
+    for(int turno = 1; turno <=turnos; turno++){
+        pid_t child_pid;
+        
+        // Father process
+        printf("Cycle %d:\n", turno);
+        fatherTask();
+        
+        // Child 1
+        child_pid = fork();
+        if (child_pid == 0) {
+            child1Task();
+            return 0; // Terminate child 1
+        } else if (child_pid < 0) {
+            perror("Fork failed");
             return 1;
         }
-
-
-        populateTablero(&inicio, file, turno);
-        printTablero(&inicio);
-        printf("--------------------------------------------\n");
-
         
-        Bsearch(&jugador1, &mapa1, &mapData, turno);
-        Bsearch(&jugador1, &mapa2, &mapData, turno);
-        Bsearch(&jugador1, &mapa1, &mapData, turno);
-        Bsearch(&jugador1, &mapa2, &mapData, turno);
-        Bsearch(&jugador1, &mapa2, &mapData, turno);
+        // Child 2
+        child_pid = fork();
+        if (child_pid == 0) {
+            child2Task();
+            return 0; // Terminate child 2
+        } else if (child_pid < 0) {
+            perror("Fork failed");
+            return 1;
+        }
         
+        // Child 3
+        child_pid = fork();
+        if (child_pid == 0) {
+            child3Task();
+            return 0; // Terminate child 3
+        } else if (child_pid < 0) {
+            perror("Fork failed");
+            return 1;
+        }
         
-
-        printf("--------\n");
-
-
-          
-        // Close the file
-        fclose(file);
-    
+        // Parent waits for all children to finish
+        for (int i = 0; i < 3; i++) {
+            int status;
+            wait(&status);
+        }
     }
+    
+
+
+    populateTablero(&inicio, file, turno);
+    printTablero(&inicio);
+    fclose(file);
+    printf("--------------------------------------------\n");
+    Bsearch(&jugador1, &mapa1, &mapData, turno);
+    printf("--------\n");
+
+    
+    
     
     //cambiar a que la structura tablero almacene el struct jugador en la posicion 
     
