@@ -42,5 +42,8 @@ void Bsearch(struct jugador *jugador, struct tablero *tablero,char *mapData[NUM_
 void populateTablero(struct tablero *tablero, FILE *filename, int turno);
 void printTablero(struct tablero *tablero);
 
+void FatherTaks();
+void ChildTask();
+
 
 #endif
