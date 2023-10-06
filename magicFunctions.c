@@ -3,6 +3,9 @@
 #include <string.h>
 #include <time.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 #define NUM_ROWS 4
 #define NUM_COLS 5
@@ -11,6 +14,11 @@
 int randomIndex(int maxIndex){
     return rand() % (maxIndex);
 };
+
+void sendMessage(int pipe_fd, const char *message) {
+    size_t message_len = strlen(message);
+    write(pipe_fd, message, message_len);
+}
 
 
 void moveRight(struct jugador *jugador, struct tablero *tablero){
@@ -42,7 +50,7 @@ void moveUp(struct jugador *jugador, struct tablero *tablero){
     int col = jugador->col;
     strcpy(tablero->data[row][col], "0");
     strcpy(tablero->data[row - 1][(col)], jugador->number);
-    jugador->row++;
+    jugador->row--;
 };
 
 void removeFromAllArrays(char arr[][NUM_COLS][MAX_FILENAME_LENGTH], int numRows, int numCols, const char *itemToRemove, int removed[][NUM_COLS]) {
@@ -98,7 +106,7 @@ const char *selectRandomItemFromRow(char fileNames[][NUM_COLS][MAX_FILENAME_LENG
 //se define 1 como down
 //se define 2 como left
 //se define 3 como right
-void Bsearch(struct jugador *jugador, struct tablero *tablero, char *mapData[NUM_ROWS][NUM_COLS][MAX_FILENAME_LENGTH], int turno){
+void Bsearch(struct jugador *jugador, struct tablero *tablero, char mapData[NUM_ROWS][NUM_COLS][MAX_FILENAME_LENGTH], int turno){
     int row = jugador->row;
     int col = jugador->col;
     const char *newMap;
