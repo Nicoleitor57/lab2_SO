@@ -27,23 +27,25 @@ struct tablero
 };
 
 int randomIndex(int maxIndex);
+void sendMessage(int pipd_fd, const char *message);
 
 void moveRight(struct jugador *jugador, struct tablero *tablero);
 void moveLeft(struct jugador *jugador, struct tablero *tablero);
 void moveUp(struct jugador *jugador, struct tablero *tablero);
 void moveDown(struct jugador *jugador, struct tablero *tablero);
 
+
 void removeFromAllArrays(char arr[][NUM_COLS][MAX_FILENAME_LENGTH], int numRows, int numCols, const char *itemToRemove, int removed[][NUM_COLS]);
 const char *selectRandomItem(char arr[][NUM_COLS][MAX_FILENAME_LENGTH], int numRows, int numCols, int removed[][NUM_COLS], int rowIndex);
 const char *selectRandomItemFromRow(char fileNames[][NUM_COLS][MAX_FILENAME_LENGTH], int rowIndex);
-void Bsearch(struct jugador *jugador, struct tablero *tablero,char *mapData[NUM_ROWS][NUM_COLS][MAX_FILENAME_LENGTH], int turno);
+void Bsearch(struct jugador *jugador, struct tablero *tablero,char mapData[NUM_ROWS][NUM_COLS][MAX_FILENAME_LENGTH], int turno);
 
 
 void populateTablero(struct tablero *tablero, FILE *filename, int turno);
 void printTablero(struct tablero *tablero);
 
-void FatherTaks();
-void ChildTask();
-
+void fatherTak();
+void childTask();
 
 #endif
+
