@@ -1,0 +1,320 @@
+#include "magicHeader.h"
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <time.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+
+int main() {
+    
+    pid_t child_pids[3]; //PIDs de los procesos hijos
+    FILE *file;
+    srand((unsigned int)time(NULL));
+    struct tablero mapa;
+    struct jugador jugador[4];
+    int Cards[8] = {1, 2, 3, 4, 5, 6, 7, 8};
+    
+    jugador[0].row = 15;
+    jugador[0].col = 15;
+    strcpy(jugador[0].number, "J1");
+    jugador[0].Buscar = 0;
+    
+    jugador[1].row = 15;
+    jugador[1].col = 17;
+    strcpy(jugador[1].number, "J2");
+    
+    jugador[2].row = 17;
+    jugador[2].col = 15;
+    strcpy(jugador[2].number, "J3");
+    
+    jugador[3].row = 17;
+    jugador[3].col = 17;
+    strcpy(jugador[3].number, "J4");
+    
+    //Inicializar el Mapa Central
+    for(int i = 0; i < 35; i++){
+        for(int j = 0; j < 35; j++){
+            strcpy(mapa.data[i][j],"-");
+        }
+    }
+    
+    char mapData[NUM_ROWS][NUM_COLS][MAX_FILENAME_LENGTH] = {
+        {"tablero2.txt","tablero3.txt","tablero4.txt","tablero5.txt","tablero6.txt"}, //Up
+        {"tablero1.txt","tablero2.txt","tablero4.txt","tablero7.txt","tablero8.txt"}, //Down
+        {"tablero1.txt","tablero3.txt","tablero4.txt","tablero6.txt","tablero7.txt"}, //Left
+        {"tablero1.txt","tablero2.txt","tablero3.txt","tablero5.txt","tablero8.txt"}, //Right
+    };
+    
+    printf(" \t... INSTRUCCIONES Y REGLAS DEL JUEGO ...\n"
+           "Buscar el Tesoro escondido correspondiente a cada Jugador, el tesoro corresponde al número del juagdor. \n");
+    printf("Card [R]: Mover X posiciones a la Derecha \n");
+    printf("Card [L]: Mover X posiciones a la Izquierda \n");
+    printf("Card [U]: Mover X posiciones hacia Arriba \n");
+    printf("Card [D]: Mover X posiciones hacia Abajo \n");
+    printf("Card [B-U]: En casilla B, usa esta carta para buscar otro mapa o Mover X posiciones hacia Arriba \n");
+    printf("Card [B-R]: En casilla B, usa esta carta para buscar otro mapa o Mover X posiciones a la Derecha \n");
+    printf("Card [E-D]: En una casilla E, usa esta carta para saltar una pared o Mover X posiciones hacia Abajo \n");
+    printf("Card [E-L]: En una casilla E, usa esta carta para saltar una pared o Mover X posiciones a la Izquierda \n\n");
+        
+    
+//---------------------------- SE INICIALIZA EL MAPA CENTRAL QUE SE USARA DURANTE EL JUEGO --------------------------
+    file = fopen("Inicio.txt", "r");
+    // Check if the file was successfully opened
+    if (file == NULL) {
+        perror("Error opening the file");
+        return 1;
+    }
+    printf("Tablero de Inicio \n");
+    char cell[3];
+    //mapa.id = 1;
+    for (int i = 0; i < 5; i++) {
+        for (int j = 0; j < 5; j++) {
+            fscanf(file, "%s", cell); // Read a cell from the file
+            strcpy(mapa.data[i+14][j+14], cell); // Store the cell in the matrix
+        }
+    }
+    for (int i = 14; i < 19; i++) {
+        printf("   ");
+        for (int j = 14; j < 19; j++){
+                printf(" %s", mapa.data[i][j]);
+        }
+        printf("\n");
+    }
+    fclose(file);
+    printf("\n--------------------------------------------------------------------------------------------------\n\n");
+//----------------------------------------------------------------------------------------------------------------------
+    
+    
+// ------------------------------------------- LOGICA DEL JUEGO --------------------------------------------------------
+    /*
+     for(rondas)
+        1. se reparten las cartas: se actualiza [jugador->randomCards]
+        2. se guarda el tablero inicial en todas las rondas para q al finalizar la ronda se muestren las posiciones inciales.
+        for(turnos)
+           1. El J1 se le pregunta cuantas casillas avanzará.
+           2. Avanza y actualiza los datos necesarios [jugador->row]
+                                                      [jugador->col]
+                                                      [jugador->Bucar]
+                                                      [jugador->Escalera]
+           3. se actualiza el mapa [mapa->data[i][j]]
+           4. se repite con el siguiente jugador
+           5. turnos++
+        2. Se muestra el mapa inicial con las posiciones con la que partieron la ronda y el mapa final luego de realizar una accion cada jugador.
+        3. se verifica si ya alguien gano.
+        4. ronda++
+     */
+    
+    
+    for(int ronda = 0; ronda < 15; ronda++){
+        printf("RONDA %i \n", ronda);
+        manoCards(jugador, Cards);
+        
+        for (int i = 0; i < 4; i++){
+            printf("Player J%d: Carta %s\n", i + 1, cardValue(jugador[i].randomCards));
+        }
+        
+        //guardamos el mapa incial para despues mostrar la posicion incial y final
+        struct tablero mapInitial;
+        for (int i = 0; i < 35; i++) {
+            for (int j = 0; j < 35; j++) {
+                printf("%s ", mapa.data[i][j]);
+                strcpy(mapInitial.data[i][j], mapa.data[i][j]);
+                //strcpy(mapa.data[i][j], mapInitial.data[i][j]);
+            }
+            printf("\n");
+        }
+        
+        
+        //crear los 3 procesos hijos
+        for (int t = 0; t < 4; t++){
+            pid_t child_pid;
+
+            int pipe_fds[3][2];
+            char readBuffer[3][25];
+    
+            for (int i = 0; i < 3; i++) {
+                if (pipe(pipe_fds[i]) == -1) {
+                    perror("Pipe creation failed");
+                    return 1;
+                }
+            };
+    
+            for (int i = 0; i < 3; i++) {
+                close(pipe_fds[i][0]);
+            };
+    
+    
+            sendMessage(pipe_fds[0][1], "a\n");
+            sendMessage(pipe_fds[1][1], "b\n");
+            sendMessage(pipe_fds[2][1], "c\n");
+            
+            //child 1
+            child_pid = fork();
+            if(child_pid < 0){
+                perror("Error al crear un proceso hijo\n");
+                return 1;
+            } else if (child_pid == 0){
+                printf("Procesos hijo creado. \n");
+                printf("Player %s location: Mapa\n", jugador[t].number);
+                
+                for(int i = 0; i < 35; i++){
+                    for(int j = 0; j < 35; j++){
+                        printf("%s ", mapa.data[i][j]);
+                    }
+                    printf("\n");
+                }
+                
+                printf("\nTurno %i: Player %s\n", t+1, jugador[t].number);
+                close(pipe_fds[0][1]);
+                close(pipe_fds[1][0]);
+                close(pipe_fds[2][0]);
+                close(pipe_fds[1][1]);
+                close(pipe_fds[2][1]);
+
+
+                int bytes_read = read(pipe_fds[0][0], readBuffer[0], sizeof(readBuffer[0]) - 1); // Read up to 24 characters
+                if (bytes_read > 0) {
+                    readBuffer[0][bytes_read] = '\0'; // Null-terminate the received message
+                    printf("Child 1 received message: %s\n", readBuffer[0]);
+                }
+                close(pipe_fds[0][0]);
+                
+                moveOptions(&jugador[t], &mapa, t, &mapData[0]);
+                
+                //printf("Pos %s: [%i][%i]\n", jugador[t].number, jugador->row, jugador->col);
+                
+                printf("----------------------------\n");
+                
+                return 0;
+            }
+            
+            //child 2
+            child_pid = fork();
+            if(child_pid < 0){
+                perror("Error al crear un proceso hijo\n");
+                return 1;
+            } else if (child_pid == 0){
+                printf("Procesos hijo creado. \n");
+                printf("Player %s location: Mapa\n", jugador[t].number);
+                
+                for(int i = 0; i < 35; i++){
+                    for(int j = 0; j < 35; j++){
+                        printf("%s ", mapa.data[i][j]);
+                    }
+                    printf("\n");
+                }
+                
+                printf("\nTurno %i: Player %s\n", t+1, jugador[t].number);
+                close(pipe_fds[0][0]);
+                close(pipe_fds[0][1]);
+                close(pipe_fds[1][1]);
+                close(pipe_fds[2][0]);
+                close(pipe_fds[2][1]);
+    
+                int bytes_read = read(pipe_fds[1][0], readBuffer[1], sizeof(readBuffer[1]) - 1); // Read up to 24 characters
+                if (bytes_read > 0) {
+                    readBuffer[1][bytes_read] = '\0'; // Null-terminate the received message
+                    printf("Child 1 received message: %s\n", readBuffer[1]);
+                }
+                
+                close(pipe_fds[1][0]);
+                
+                moveOptions(&jugador[t], &mapa, t, &mapData[0]);
+                
+                //printf("Pos %s: [%i][%i]\n", jugador[t].number, jugador->row, jugador->col);
+                
+                printf("----------------------------\n");
+                
+                return 0; //terminate child 2
+            }
+            
+            //child 3
+            child_pid = fork();
+            if(child_pid < 0){
+                perror("Error al crear un proceso hijo\n");
+                return 1;
+            } else if (child_pid == 0){
+                printf("Procesos hijo creado. \n");
+                printf("Player %s location: Mapa\n", jugador[t].number);
+                
+                for(int i = 0; i < 35; i++){
+                    for(int j = 0; j < 35; j++){
+                        printf("%s ", mapa.data[i][j]);
+                    }
+                    printf("\n");
+                }
+                
+                printf("\nTurno %i: Player %s\n", t+1, jugador[t].number);
+                close(pipe_fds[0][0]);
+                close(pipe_fds[0][1]);
+                close(pipe_fds[1][0]);
+                close(pipe_fds[1][1]);
+                close(pipe_fds[2][1]);
+    
+                int bytes_read = read(pipe_fds[2][0], readBuffer[2], sizeof(readBuffer[2]) - 1); // Read up to 24 characters
+                if (bytes_read > 0) {
+                    readBuffer[2][bytes_read] = '\0'; // Null-terminate the received message
+                    printf("Child 1 received message: %s\n", readBuffer[2]);
+                }
+                close(pipe_fds[2][0]);
+
+                
+                moveOptions(&jugador[t], &mapa, t, &mapData[0]);
+                
+                //printf("Pos %s: [%i][%i]\n", jugador[t].number, jugador->row, jugador->col);
+                
+                printf("----------------------------\n");
+                
+                return 0;
+            }
+            
+            /*for(int turno = 0; turno < 4; turno++){
+             printf("Player %s location: Mapa\n", jugador[turno].number);
+             
+             for(int i = 0; i < 35; i++){
+             for(int j = 0; j < 35; j++){
+             printf("%s ", mapa.data[i][j]);
+             }
+             printf("\n");
+             }
+             
+             printf("\nTurno %i: Player %s\n", turno+1, jugador[turno].number);
+             
+             moveOptions(&jugador[turno], &mapa, turno, &mapData[0]);
+             
+             //printMapas(&mapInitial, &mapFinal);
+             
+             //printf("r: %i - c: %i - B: %i\n", jugador[turno].row, jugador[turno].col, jugador[turno].Buscar);
+             printf("Pos %s: [%i][%i]\n", jugador[turno].number, jugador->row, jugador->col);
+             
+             printf("----------------------------\n");
+             }*/
+            
+            
+            printMapas(&mapInitial, &mapa);
+            
+            for (int i = 0; i < 35; i++) {
+                for (int j = 0; j < 35; j++) {
+                    //strcpy(mapa.data[i][j], mapInitial.data[i][j]);
+                    printf("%s ", mapa.data[i][j]);
+                }
+                printf("\n");
+            }
+            
+            //Esperamos a que uno de los procesos hijos termine
+            int status;
+            pid_t winner_pid = wait(&status);
+            
+            //si uno de los jugadores con su trofeo, vuelve al inicio se termina el juego;
+            for ( int i = 0; i < 4; i++){
+                if(jugador[i].Treasure == 1 && jugador[i].row == 15 && jugador[i].col == 15){
+                    printf("\t\t¡¡¡ FELICITACIONES JUGADOR %s HAS GANADO LA PARTIDA !!!\n", jugador[i].number);
+                    break;
+                }
+            }
+        }
+    }
+    return 0;
+}
